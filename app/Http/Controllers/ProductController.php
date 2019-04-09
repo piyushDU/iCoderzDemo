@@ -4,11 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Product;
 use App\ProductCategory;
+use App\ProductImage;
 use Illuminate\Http\Request;
 use DB;
+use Illuminate\Support\Facades\Input; 
 
 class ProductController extends Controller
 {
+
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -16,7 +28,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $productList = Product::with('category', 'product_images')->get();
+        $productList = Product::with('category')->orderBy('id', 'desc')->get();
         return view('home', compact('productList'));
     }
 
@@ -42,7 +54,7 @@ class ProductController extends Controller
         $request->validate([
             'product_name' => 'required',
             'quantity' => 'required',
-            'category_id' => 'required',
+            'category' => 'required',
             'description' => 'required',
             'website_url' => 'required|url',
         ]);
@@ -50,7 +62,7 @@ class ProductController extends Controller
         $saveData = new Product();
         $saveData->product_name = $request['product_name'];
         $saveData->quantity = $request['quantity'];
-        $saveData->category_id = $request['category_id'];
+        $saveData->category_id = $request['category'];
         $saveData->description = $request['description'];
         $saveData->website_url = $request['website_url'];  
         $saveData->save(); 
@@ -95,7 +107,9 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         $getProductCategory = ProductCategory::get();
-        return view('products.edit',compact('product', 'getProductCategory'));
+        $getProductImages = ProductImage::where('product_id', $product['id'])->get();
+        
+        return view('products.edit',compact('product', 'getProductCategory', 'getProductImages'));
     }
 
     /**
@@ -110,7 +124,7 @@ class ProductController extends Controller
         $request->validate([
             'product_name' => 'required',
             'quantity' => 'required',
-            'category_id' => 'required',
+            'category' => 'required',
             'description' => 'required',
             'website_url' => 'required|url',
         ]);
@@ -118,7 +132,7 @@ class ProductController extends Controller
         $updateData = Product::find($product['id']);
         $updateData->product_name = $request['product_name'];
         $updateData->quantity = $request['quantity'];
-        $updateData->category_id = $request['category_id'];
+        $updateData->category_id = $request['category'];
         $updateData->description = $request['description'];
         $updateData->website_url = $request['website_url'];  
         $updateData->update(); 
@@ -139,7 +153,7 @@ class ProductController extends Controller
         }
         
         return redirect()->route('home')
-                        ->with('status','Product created successfully.');
+                        ->with('status','Product updated successfully.');
     }
 
     /**
@@ -153,12 +167,23 @@ class ProductController extends Controller
         $product->delete();
   
         return redirect()->route('home')
-                        ->with('success','Product deleted successfully');
+                        ->with('status','Product deleted successfully');
     }
 
     public function search()
     {
-        $name = Request::has('name');
-        dd($name);
+
+        $productName = Input::get( 'name' );
+        
+        $productList = Product::where('product_name','like','%'.$productName.'%')
+               ->orWhereHas('category', function($q) use ($productName){
+                    return $q->where('category_name','like','%'. $productName . '%');
+               })->get();
+
+    
+    if(count($productList) > 0)
+        return view('home', compact('productList'))->withDetails($productList)->withQuery ( $productName );
+    else 
+        return view ('home', compact('productList'))->withMessage('No Details found. Try to search again !');
     }
 }

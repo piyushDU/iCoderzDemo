@@ -10,7 +10,13 @@
                 <form action="{{ route('search') }}" method="GET" role="search">
                 {{ csrf_field() }}
                 <div class="input-group">
-                    <input type="text" name="name">
+                    
+                    <input type="text" class="form-control" name="name"
+            placeholder="Search here"> <span class="input-group-btn">
+            <button type="submit" class="btn btn-success">
+                <span class="glyphicon glyphicon-search">Search</span>
+            </button>
+        </span>
                 </div>
             </form>
 
@@ -23,6 +29,7 @@
                     <div class="pull-right">
                     <a class="btn btn-success" href="{{ route('products.create') }}"> Create New Product</a>
                     </div>
+                    @if($productList->isNotEmpty())
                     <table class="table table-bordered">
                         <tr>
                             <th>No</th>
@@ -30,18 +37,17 @@
                             <th>Quantity</th>
                             <th>Category</th>
                             <th>Description</th>
-                            <th>Image</th>
                             <th width="280px">Action</th>
                         </tr>
+                        
+                        
                         @foreach ($productList as $product)
-                       
                         <tr>
                             <td>{{ $product['id'] }}</td>
                             <td>{{ $product['product_name'] }}</td>
                             <td>{{ $product['quantity'] }}</td>
                             <td>{{ $product['category']['category_name'] }}</td>
                             <td>{{ $product['description'] }}</td>
-                            <td><img src="{{ URL::to('/') }}/image/{{ $product['product_images']['image'] }}" width="100px" height="100px" alt=""/></td>
                             <td>
                                 <form action="{{ route('products.destroy',$product->id) }}" method="POST">
             
@@ -56,18 +62,12 @@
                         </tr>
                         @endforeach
                  </table>
+                 @else 
+                         <strong>Sorry!</strong> No Product Found.
+                 @endif
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-
-
-
-   
-    
-  
-   
-
 @endsection

@@ -55,7 +55,7 @@
 <div class="form-group">
 
     <strong>Category Name:</strong>
-    <select name="category_id" class="form-control">
+    <select name="category" class="form-control">
     <option value="">--- Select Category ---</option>
     @foreach ($getProductCategory as  $category)
             <option value="{{ $category['id'] }}" {{ $category['id'] == $product->category_id ? 'selected="selected"' : '' }}>{{ $category['category_name'] }}</option>
@@ -80,7 +80,11 @@
 <div class="form-group">
 <label for="">Multiple File Select</label>
 <input type="file" class="form-control" name="image[]" multiple>
-<img src="{{ URL::to('/') }}/image/{{ $product['product_images']['image'] }}" width="100px" height="100px" alt=""/>
+
+@foreach($getProductImages as $image)
+    <img src="{{ URL::to('/') }}/image/{{ $image['image'] }}" width="100px" height="100px" alt=""/>
+@endforeach
+
 </div>
 </div>
 

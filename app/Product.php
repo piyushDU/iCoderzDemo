@@ -22,12 +22,4 @@ class Product extends Model
     {
         return $this->hasOne('App\ProductCategory',  'id', 'category_id');
     }
-
-    /**
-     * Get the product images.
-     */
-    public function product_images()
-    {
-        return $this->hasOne('App\ProductImage',  'product_id', 'id');
-    }
 }
